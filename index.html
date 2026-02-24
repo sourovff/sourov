@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SoURoV RaY</title>
+  <link rel="icon" href="https://i.ibb.co.com/wXs0P8J/Mylogo710-removebg-preview.png">
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  
+  <!-- AOS Animation CSS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --neon-blue: #00f2ff;
+      --neon-pink: #ff007f;
+      --neon-purple: #b300ff;
+      --neon-green: #00ff9d;
+      --neon-yellow: #ffd700;
+      --bg-dark: #02050a;
+      --glass: rgba(0, 242, 255, 0.08);
+      --cyber-grid: #0a192f;
+      --success: #00ff00;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: linear-gradient(135deg, rgba(0,242,255,0.1) 0%, rgba(255,0,127,0.1) 100%);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.3;
+      z-index: -1;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 90px;
+      font-weight: 900;
+      text-transform: uppercase;
+      text-shadow: 0 0 30px rgba(0,242,255,0.5);
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 50px;
+      }
+    }
+
+    .hero h1 span {
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-typing {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 36px;
+      color: var(--neon-blue);
+      border-right: 4px solid var(--neon-blue);
+      padding-right: 15px;
+      display: inline-block;
+      min-height: 60px;
+    }
+
+    /* Sections */
+    section {
+      padding: 80px 0;
+      position: relative;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      color: transparent;
+      -webkit-text-stroke: 2px var(--neon-blue);
+      margin-bottom: 50px;
+    }
+
+    /* Cards */
+    .about-card, .contact-info, .social-feed {
+      background: rgba(0, 242, 255, 0.05);
+      border: 1px solid rgba(0, 242, 255, 0.2);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 15px;
+    }
+
+    /* Hamburger Menu */
+    .hamburger-menu {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      cursor: pointer;
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--neon-pink);
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .hamburger-menu span {
+      width: 35px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+
+    /* Sidebar */
+    #header {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      bottom: 0;
+      width: 300px;
+      background: rgba(2, 5, 10, 0.98);
+      backdrop-filter: blur(10px);
+      border-left: 3px solid var(--neon-pink);
+      padding: 30px 20px;
+      z-index: 9999;
+      transition: right 0.4s;
+    }
+
+    #header.show {
+      right: 0;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9998;
+      display: none;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    /* Profile Image */
+    .profile-img {
+      width: 160px;
+      height: 160px;
+      margin: 15px auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid var(--neon-blue);
+      cursor: pointer;
+      transition: all 0.5s;
+    }
+
+    .profile-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .sitename {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      text-align: center;
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 15px 0;
+    }
+
+    /* Navigation */
+    .navmenu a {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Share Tech Mono', monospace;
+      transition: all 0.3s;
+      background: rgba(0, 242, 255, 0.03);
+      margin-bottom: 8px;
+      border-radius: 10px;
+    }
+
+    .navmenu a:hover {
+      color: var(--neon-blue);
+      background: rgba(0, 242, 255, 0.15);
+      transform: translateX(5px);
+    }
+
+    .navmenu a i {
+      font-size: 24px;
+      margin-right: 20px;
+      color: var(--neon-blue);
+    }
+
+    /* Skills */
+    .skill-item {
+      margin-bottom: 25px;
+    }
+
+    .progress {
+      height: 12px;
+      background: rgba(0, 242, 255, 0.1);
+      border-radius: 6px;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+    }
+
+    /* Social Cards */
+    .social-card {
+      background: rgba(2, 5, 10, 0.8);
+      border: 1px solid rgba(0, 242, 255, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+
+    .social-card:hover {
+      border-color: var(--neon-pink);
+      transform: translateX(5px);
+    }
+
+    .social-left i {
+      font-size: 28px;
+      margin-right: 15px;
+    }
+
+    .facebook i { color: #1877f2; }
+    .instagram i { color: #e4405f; }
+    .whatsapp i { color: #25d366; }
+    .telegram i { color: #0088cc; }
+
+    /* Gallery */
+    .gallery-item {
+      position: relative;
+      border-radius: 15px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+      padding: 3px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(2, 5, 10, 0.95));
+      padding: 15px;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      transform: translateY(0);
+    }
+
+    /* Map */
+    #map {
+      height: 400px;
+      border-radius: 10px;
+      border: 2px solid var(--neon-pink);
+    }
+
+    .location-info {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(0, 242, 255, 0.05);
+      border: 1px solid rgba(0, 242, 255, 0.2);
+      border-radius: 10px;
+    }
+
+    /* Contact */
+    .contact-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      padding: 15px;
+      border-bottom: 1px solid rgba(0, 242, 255, 0.1);
+    }
+
+    .contact-item i {
+      font-size: 32px;
+      color: var(--neon-blue);
+      margin-right: 20px;
+    }
+
+    .form-control {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid var(--neon-blue);
+      color: white;
+      padding: 15px;
+    }
+
+    .form-control:focus {
+      box-shadow: 0 0 20px var(--neon-blue);
+      border-color: var(--neon-blue);
+    }
+
+    /* Footer */
+    #footer {
+      background: rgba(1, 3, 6, 0.95);
+      padding: 25px;
+      text-align: center;
+      border-top: 2px solid var(--neon-pink);
+    }
+
+    /* Matrix Canvas */
+    .matrix-rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.05;
+    }
+
+    /* ===== SOUROV RAY UNIQUE LOADER ===== */
+    #sourov-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #02050a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+
+    #sourov-loader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-container {
+      text-align: center;
+      position: relative;
+    }
+
+    .ray-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 80px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 20px;
+      animation: flicker 2s infinite;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .ray-text {
+        font-size: 40px;
+        letter-spacing: 10px;
+      }
+    }
+
+    .ray-text span {
+      display: inline-block;
+      animation: wave 1.5s infinite;
+      animation-delay: calc(0.1s * var(--i));
+    }
+
+    .ray-text span:nth-child(1) { --i: 1; color: #00f2ff; }
+    .ray-text span:nth-child(2) { --i: 2; color: #ff007f; }
+    .ray-text span:nth-child(3) { --i: 3; color: #b300ff; }
+    .ray-text span:nth-child(4) { --i: 4; color: #00ff9d; }
+    .ray-text span:nth-child(5) { --i: 5; color: #ffd700; }
+    .ray-text span:nth-child(6) { --i: 6; color: #00f2ff; }
+    .ray-text span:nth-child(7) { --i: 7; color: #ff007f; }
+    .ray-text span:nth-child(8) { --i: 8; color: #b300ff; }
+    .ray-text span:nth-child(9) { --i: 9; color: #00ff9d; }
+    .ray-text span:nth-child(10) { --i: 10; color: #ffd700; }
+    .ray-text span:nth-child(11) { --i: 11; color: #00f2ff; }
+
+    @keyframes wave {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+        text-shadow: 0 0 20px currentColor;
+      }
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      25% { opacity: 0.8; }
+      50% { opacity: 1; }
+      75% { opacity: 0.9; }
+    }
+
+    .loader-bar {
+      width: 300px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 30px auto;
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+
+    .loader-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #00f2ff, #ff007f, #b300ff, #00ff9d);
+      animation: loading 2s infinite;
+    }
+
+    @keyframes loading {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .loader-percent {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 24px;
+      color: #00f2ff;
+      margin-top: 10px;
+    }
+
+    .glitch-text {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 5px;
+      animation: glitch 3s infinite;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); opacity: 0.5; }
+      33% { transform: translate(2px, -2px); opacity: 1; color: #ff007f; }
+      66% { transform: translate(-2px, 2px); opacity: 1; color: #00f2ff; }
+    }
+
+    .ray-pulse {
+      width: 20px;
+      height: 20px;
+      background: #00f2ff;
+      border-radius: 50%;
+      margin: 20px auto;
+      box-shadow: 0 0 30px #00f2ff;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.5; background: #ff007f; box-shadow: 0 0 50px #ff007f; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    /* ===== END LOADER ===== */
+  </style>
+</head>
+
+<body>
+
+  <!-- SOUROV RAY UNIQUE LOADER -->
+  <div id="sourov-loader">
+    <div class="loader-container">
+      <div class="ray-text">
+        <span>S</span>
+        <span>o</span>
+        <span>U</span>
+        <span>R</span>
+        <span>o</span>
+        <span>V</span>
+        <span> </span>
+        <span>R</span>
+        <span>a</span>
+        <span>Y</span>
+        
+      </div>
+      
+      <div class="loader-bar"></div>
+      
+      <div class="loader-percent" id="loader-percent">0%</div>
+      
+      <div class="ray-pulse"></div>
+      
+      <div class="glitch-text">"INITIALIZING SoURoV RaY OS"...</div>
+    </div>
+  </div>
+
+  <canvas class="matrix-rain" id="matrixCanvas"></canvas>
+
+  <!-- Hamburger Menu Icon -->
+  <div class="hamburger-menu" id="hamburgerMenu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar Header -->
+  <header id="header">
+    <div class="profile-img">
+      <img src="https://i.ibb.co.com/ycZ3L5St/11651.png" alt="Sourov Ray">
+    </div>
+    <h1 class="sitename">SoURoV RaY</h1>
+    
+    <div class="status-indicator text-center mb-3">
+      <span class="badge bg-success">ACTIVE</span>
+    </div>
+
+    <nav class="navmenu">
+      <ul class="list-unstyled">
+        <li><a href="#hero"><i class="bi bi-house"></i> _HOME</a></li>
+        <li><a href="#about"><i class="bi bi-person"></i> _ABOUT</a></li>
+        <li><a href="#skills"><i class="bi bi-cpu"></i> _SKILLS</a></li>
+        <li><a href="#gallery"><i class="bi bi-images"></i> _GALLERY</a></li>
+        <li><a href="#contact"><i class="bi bi-envelope"></i> _CONTACT</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-social d-flex justify-content-center gap-3 mt-4">
+      <a href="https://github.com/sourovff" class="text-white"><i class="bi bi-github"></i></a>
+      <a href="https://t.me/sourov_ray" class="text-white"><i class="bi bi-telegram"></i></a>
+      <a href="https://twitter.com/sourovxray" class="text-white"><i class="bi bi-twitter-x"></i></a>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+      <div class="container text-center">
+        <h1 data-aos="fade-right">
+          I AM <br>
+          <span>SOUROV RAY</span>
+        </h1>
+        <div data-aos="fade-left" data-aos-delay="200">
+          <span class="hero-typing" id="typed"></span>
+        </div>
+        <div class="mt-5" data-aos="fade-up" data-aos-delay="400">
+          <a href="#contact" class="btn btn-outline-info btn-lg me-3">HIRE ME</a>
+          <a href="#gallery" class="btn btn-outline-info btn-lg">WHO AM I</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+      <div class="container">
+        <h2 class="section-title" data-aos="fade-right">ABOUT</h2>
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="about-card" data-aos="fade-up">
+              <p class="fs-5">I'm a digital architect and creative developer. 
+                <span class="text-info">Coding</span> isn't just a profession for me, it's a language through which I create future designs.</p>
+              <p class="fs-5 mt-4">Currently, I'm researching <span class="text-danger">Neural Networks</span> and 
+                <span class="text-danger">Artificial Intelligence</span>.</p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="about-card text-center" data-aos="fade-left">
+              <h3 class="text-info display-4">3+</h3>
+              <p>Years Experience</p>
+              <h3 class="text-danger display-4">20+</h3>
+              <p>Projects Completed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills">
+      <div class="container">
+        <h2 class="section-title" data-aos="fade-right">MY SKILLS</h2>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="skill-item" data-aos="fade-right">
+              <div class="d-flex justify-content-between mb-2">
+                <span>HTML</span>
+                <span>100%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width: 100%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item" data-aos="fade-right">
+              <div class="d-flex justify-content-between mb-2">
+                <span>CSS</span>
+                <span>80%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width: 80%"></div>
+              </div>
+            </div>
+            
+            <div class="skill-item" data-aos="fade-right" data-aos-delay="100">
+              <div class="d-flex justify-content-between mb-2">
+                <span>JavaScript</span>
+                <span>60%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width: 60%"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="skill-item" data-aos="fade-left">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Bootstrap</span>
+                <span>90%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width: 90%"></div>
+              </div>
+            </div>
+            <div class="skill-item" data-aos="fade-left" data-aos-delay="100">
+              <div class="d-flex justify-content-between mb-2">
+                <span>Python</span>
+                <span>50%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" style="width: 50%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+   
+    <!-- Gallery Section -->
+    <section id="gallery">
+      <div class="container">
+        <h2 class="section-title" data-aos="fade-right">MY GALLERY</h2>
+        <div class="row">
+          <div class="col-md-3 col-6">
+            <div class="gallery-item" data-aos="flip-left">
+              <img src="https://i.ibb.co.com/6cgmZ8Kg/1763907079301.png" alt="Gallery 1">
+              <div class="gallery-overlay">
+                <h5>SoURoV RaY</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="gallery-item" data-aos="flip-left" data-aos-delay="100">
+              <img src="https://i.ibb.co.com/9mNwmCJc/1767236965726.png" alt="Gallery 2">
+              <div class="gallery-overlay">
+                <h5>SoURoV RaY</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="gallery-item" data-aos="flip-left" data-aos-delay="200">
+              <img src="https://i.ibb.co.com/sJCVkPXv/1765549586223.png" alt="Gallery 3">
+              <div class="gallery-overlay">
+                <h5>SoURoV RaY</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="gallery-item" data-aos="flip-left" data-aos-delay="300">
+              <img src="https://i.ibb.co.com/5XcK4zgs/1765035909638.png" alt="Gallery 4">
+              <div class="gallery-overlay">
+                <h5>SoURoV RaY</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+     <!-- Social Media Section -->
+    <section id="contact"">
+      <div class="container">
+        <h2 class="section-title" data-aos="fade-right">FOLLOW ME</h2>
+        <div class="social-feed" data-aos="zoom-in">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="social-card facebook" onclick="window.open('https://www.facebook.com/sourovxray', '_blank')">
+                <div class="social-left">
+                  <i class="bi bi-facebook"></i>
+                  <span>Facebook</span>
+                </div>
+                <i class="bi bi-arrow-right-short"></i>
+              </div>
+            </div>
+            
+            <div class="col-md-3">
+              <div class="social-card instagram" onclick="window.open('https://www.instagram.com/sourovxray', '_blank')">
+                <div class="social-left">
+                  <i class="bi bi-instagram"></i>
+                  <span>Instagram</span>
+                </div>
+                <i class="bi bi-arrow-right-short"></i>
+              </div>
+            </div>
+            
+            <div class="col-md-3">
+              <div class="social-card whatsapp" onclick="window.open('https://wa.me/8801789538134', '_blank')">
+                <div class="social-left">
+                  <i class="bi bi-whatsapp"></i>
+                  <span>Whatsapp</span>
+                </div>
+                <i class="bi bi-arrow-right-short"></i>
+              </div>
+            </div>
+            
+            <div class="col-md-3">
+              <div class="social-card telegram" onclick="window.open('https://t.me/sourov_ray', '_blank')">
+                <div class="social-left">
+                  <i class="bi bi-telegram"></i>
+                  <span>Telegram</span>
+                </div>
+                <i class="bi bi-arrow-right-short"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+
+    <!-- Contact Section -->
+    <section id="contact">
+      <div class="container">
+        <h2 class="section-title" data-aos="fade-right">CONNECT</h2>
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="contact-info" data-aos="fade-right">
+              <div class="contact-item">
+                <i class="bi bi-geo-alt"></i>
+                <div>
+                  <h5>Location</h5>
+                  <p>Dinajpur, Bangladesh</p>
+                </div>
+              </div>
+              <div class="contact-item">
+                <i class="bi bi-envelope"></i>
+                <div>
+                  <h5>Email</h5>
+                  <p>sourovxray@gmail.com</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <form class="contact-info" data-aos="fade-left" onsubmit="event.preventDefault(); alert('Message sent! (Demo)');">
+              <div class="mb-3">
+                <input type="text" class="form-control" placeholder="Your Name" required>
+              </div>
+              <div class="mb-3">
+                <input type="email" class="form-control" placeholder="Your Email" required>
+              </div>
+              <div class="mb-3">
+                <textarea class="form-control" rows="5" placeholder="Message" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-outline-info w-100">SEND MESSAGE</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Map Section -->
+    <section id="location">
+      <div class="container">
+        <h2 class="section-title" data-aos="fade-right">FIND ME</h2>
+        <div class="map-container" data-aos="zoom-in">
+          <div id="map"></div>
+          <div class="location-info">
+            <i class="bi bi-geo-alt-fill text-danger"></i>
+            <span class="ms-2">📍 Dinajpur, Bangladesh • Remote</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="footer">
+    <p class="mb-0">© 2026 SOUROV RAY | STATUS: <span class="text-success">ONLINE</span></p>
+    <p>Design By SoURoV ✅</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script>
+    // AOS Initialization
+    AOS.init({
+      duration: 800,
+      once: true
+    });
+
+    // Hamburger Menu
+    const hamburger = document.getElementById('hamburgerMenu');
+    const header = document.getElementById('header');
+    const overlay = document.getElementById('overlay');
+
+    function toggleMenu() {
+      hamburger.classList.toggle('active');
+      header.classList.toggle('show');
+      overlay.classList.toggle('show');
+    }
+
+    hamburger.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+
+    // Typing Effect
+    const words = ["Web Developer", "UI/UX Designer", "Cyber Enthusiast", "AI Researcher"];
+    let i = 0, j = 0, isDeleting = false;
+    const typedElement = document.getElementById('typed');
+
+    function type() {
+      if (!typedElement) return;
+      
+      const current = words[i];
+      typedElement.textContent = current.substring(0, j);
+      
+      if (!isDeleting && j === current.length) {
+        setTimeout(() => isDeleting = true, 2000);
+      } else if (isDeleting && j === 0) {
+        isDeleting = false;
+        i = (i + 1) % words.length;
+      }
+      
+      j = isDeleting ? j - 1 : j + 1;
+      setTimeout(type, isDeleting ? 100 : 200);
+    }
+    
+    window.addEventListener('load', type);
+
+    // Map
+    function initMap() {
+      const dinajpur = [25.6279, 88.6332]; // Dinajpur coordinates
+      const map = L.map('map').setView(dinajpur, 12);
+      
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+      
+      L.marker(dinajpur).addTo(map)
+        .bindPopup('📍 Dinajpur, Bangladesh')
+        .openPopup();
+    }
+
+    if (document.getElementById('map')) {
+      initMap();
+    }
+
+    // Matrix Rain
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    
+    resizeCanvas();
+
+    const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%&*";
+    const matrixArray = matrix.split("");
+    const fontSize = 14;
+    const columns = Math.ceil(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0f0';
+      ctx.font = fontSize + 'px monospace';
+
+      for(let i = 0; i < drops.length; i++) {
+        const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 35);
+
+    // Smooth Scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if(target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+          if(header.classList.contains('show')) toggleMenu();
+        }
+      });
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+
+    // ===== SOUROV RAY LOADER ANIMATION =====
+    const loader = document.getElementById('sourov-loader');
+    const percentElement = document.getElementById('loader-percent');
+    let percent = 0;
+    
+    const interval = setInterval(() => {
+      percent += Math.floor(Math.random() * 10) + 1; // 1-10 increment
+      if (percent >= 100) {
+        percent = 100;
+        clearInterval(interval);
+        
+        // Fade out loader after reaching 100%
+        setTimeout(() => {
+          loader.classList.add('fade-out');
+          
+          // Optional: Remove loader from DOM after animation
+          setTimeout(() => {
+            loader.style.display = 'none';
+          }, 1000);
+        }, 500);
+      }
+      percentElement.textContent = percent + '%';
+    }, 200);
+    // ===== END LOADER ANIMATION =====
+  </script>
+</body>
+
+</html>
