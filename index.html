@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -516,7 +516,67 @@
       50% { transform: scale(1.5); opacity: 0.5; background: #ff007f; box-shadow: 0 0 50px #ff007f; }
       100% { transform: scale(1); opacity: 1; }
     }
-    /* ===== END LOADER ===== */
+    
+    /* ===== NEW CV BUTTON STYLES ===== */
+    .btn-cv {
+      background: linear-gradient(45deg, #ff69b4, #ff007f);
+      border: none;
+      color: #02050a;
+      font-weight: bold;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      margin-left: 10px;
+    }
+    
+    .btn-cv:hover {
+      background: transparent;
+      color: #00ff9d;
+      border-color: #00ff9d;
+      transform: translateY(-3px);
+      box-shadow: 0 0 30px rgba(0, 255, 157, 0.5);
+    }
+    
+    .btn-cv i {
+      margin-right: 8px;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    
+    .cv-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 255, 157, 0.9);
+      color: #02050a;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      z-index: 99999;
+      animation: slideIn 0.3s ease;
+      border: 2px solid #00f2ff;
+      box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .btn-cv {
+        margin-left: 0;
+        margin-top: 10px;
+        display: block;
+        width: 100%;
+      }
+    }
+    /* ===== END CV BUTTON STYLES ===== */
   </style>
 </head>
 
@@ -564,7 +624,7 @@
   <!-- Sidebar Header -->
   <header id="header">
     <div class="profile-img">
-      <img src="https://i.ibb.co.com/ycZ3L5St/11651.png" alt="Sourov Ray">
+      <img src="https://i.ibb.co.com/qL4zKxPd/IMG-20260225-195943.jpg" alt="Sourov Ray">
     </div>
     <h1 class="sitename">SoURoV RaY</h1>
     
@@ -603,7 +663,11 @@
         </div>
         <div class="mt-5" data-aos="fade-up" data-aos-delay="400">
           <a href="#contact" class="btn btn-outline-info btn-lg me-3">HIRE ME</a>
-          <a href="#gallery" class="btn btn-outline-info btn-lg">WHO AM I</a>
+          <a href="#gallery" class="btn btn-outline-info btn-lg me-3">WHO AM I</a>
+          <!-- NEW CV DOWNLOAD BUTTON -->
+          <a href="#" id="downloadCV" class="btn btn-cv btn-lg">
+            <i class="bi bi-file-pdf"></i> DOWNLOAD CV
+          </a>
         </div>
       </div>
     </section>
@@ -726,7 +790,7 @@
           </div>
           <div class="col-md-3 col-6">
             <div class="gallery-item" data-aos="flip-left" data-aos-delay="300">
-              <img src="https://i.ibb.co.com/5XcK4zgs/1765035909638.png" alt="Gallery 4">
+              <img src="https://i.ibb.co.com/JwPwMW8c/1763299847406.png" alt="Gallery 4">
               <div class="gallery-overlay">
                 <h5>SoURoV RaY</h5>
               </div>
@@ -737,7 +801,7 @@
     </section>
     
      <!-- Social Media Section -->
-    <section id="contact"">
+    <section id="social">
       <div class="container">
         <h2 class="section-title" data-aos="fade-right">FOLLOW ME</h2>
         <div class="social-feed" data-aos="zoom-in">
@@ -901,7 +965,7 @@
 
     // Map
     function initMap() {
-      const dinajpur = [25.6279, 88.6332]; // Dinajpur coordinates
+      const dinajpur = [25.6279, 88.6332];
       const map = L.map('map').setView(dinajpur, 12);
       
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -970,16 +1034,13 @@
     let percent = 0;
     
     const interval = setInterval(() => {
-      percent += Math.floor(Math.random() * 10) + 1; // 1-10 increment
+      percent += Math.floor(Math.random() * 10) + 1;
       if (percent >= 100) {
         percent = 100;
         clearInterval(interval);
         
-        // Fade out loader after reaching 100%
         setTimeout(() => {
           loader.classList.add('fade-out');
-          
-          // Optional: Remove loader from DOM after animation
           setTimeout(() => {
             loader.style.display = 'none';
           }, 1000);
@@ -988,7 +1049,40 @@
       percentElement.textContent = percent + '%';
     }, 200);
     // ===== END LOADER ANIMATION =====
+    
+    // ===== NEW CV DOWNLOAD FUNCTIONALITY =====
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'cv-notification';
+      notification.innerHTML = `<i class="bi bi-check-circle"></i> ${message}`;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s reverse';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    const downloadBtn = document.getElementById('downloadCV');
+    
+    if (downloadBtn) {
+      downloadBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Your Google Drive File ID
+        const fileId = '1cAGnsY7vxSEcaJLy97nE0YSxbci6LRY5';
+        
+        // Direct download link
+        const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        
+        // Show notification
+        showNotification('CV Download Started!');
+        
+        // Open in new tab
+        window.open(directDownloadUrl, '_blank');
+      });
+    }
+    // ===== END CV DOWNLOAD =====
   </script>
 </body>
-
 </html>
